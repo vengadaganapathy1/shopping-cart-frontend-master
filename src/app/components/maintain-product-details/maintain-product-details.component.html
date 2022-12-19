@@ -1,0 +1,88 @@
+<div>
+  <div *ngIf="currentProductDetail.id" class="form">
+    <h4>Update product details</h4>
+    <form>
+      <div class="form-group">
+        <label for="title">Product SKU</label>
+        <input
+          type="text"
+          class="form-control"
+          id="sku"
+          [(ngModel)]="currentProductDetail.productSKU"
+          name="sku"
+        />
+      </div>
+      <div class="form-group">
+        <label for="description">Product name</label>
+        <input
+          type="text"
+          class="form-control"
+          id="name"
+          [(ngModel)]="currentProductDetail.productName"
+          name="name"
+        />
+      </div>
+      <div class="form-group">
+        <label for="description">Product price</label>
+        <input
+          type="text"
+          class="form-control"
+          id="price"
+          [(ngModel)]="currentProductDetail.productPrice"
+          name="price"
+        />
+      </div>
+
+      <div class="form-group">
+        <label><strong>Status:</strong></label>
+        {{ currentProductDetail.status ? "Active" : "InActive" }}
+      </div>
+      <div class="form-group">
+        <label><strong>Description:</strong></label>
+        <p>Lorem Ipsum is simply dummy text of the printing.</p>
+      </div>
+    </form>
+    <div class="clearfix">
+      <button
+        type="submit"
+        class="btn btn-primary float-right"
+        (click)="updateProductDetails()"
+      >
+        Update
+      </button>
+      <button
+        class="btn btn-secondary mr-2 float-right"
+        (click)="deleteProduct()"
+      >
+        Delete
+      </button>
+      <button
+        class="btn btn-light mr-2 float-right"
+        *ngIf="currentProductDetail.status"
+        (click)="updatePublished(false)"
+      >
+        Inactivate
+      </button>
+      <button
+        *ngIf="!currentProductDetail.status"
+        class="btn btn-light mr-2 float-right"
+        (click)="updatePublished(true)"
+      >
+        Activate
+      </button>
+
+      <button
+        class="btn btn-light mr-2 float-right"
+        (click)="showListPage('cancel')"
+      >
+        Cancel
+      </button>
+    </div>
+
+    <p>{{ message }}</p>
+  </div>
+  <div *ngIf="!currentProductDetail.id">
+    <br />
+    <p>Cannot access this product...</p>
+  </div>
+</div>

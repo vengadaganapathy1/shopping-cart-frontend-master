@@ -1,0 +1,17 @@
+<p>Please select file to import</p>
+<input type="file" accept=".csv" (change)="handleFileSelect($event)" />
+<hr />
+<div class="clearfix">
+  <button
+    class="m-1 btn btn-sm btn-primary float-right"
+    (click)="importProductDetails()"
+  >
+    Import
+  </button>
+  <button
+    (click)="showListPage('cancel')"
+    class="btn btn-secondary float-right mr-2"
+  >
+    Cancel
+  </button>
+</div>
