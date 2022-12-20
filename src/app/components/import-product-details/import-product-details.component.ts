@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { Papa } from 'ngx-papaparse';
+import { ToastrService } from 'ngx-toastr';
 
 import { ProductManagementService } from 'src/app/services/productmanagement.service';
 import { PRODUCT_MANAGEMENT } from '../../constants/constant';
@@ -16,7 +17,8 @@ export class ImportProductDetailsComponent {
   constructor(
     private router: Router,
     private productManagementService: ProductManagementService,
-    private papa: Papa
+    private papa: Papa,
+    private toastr: ToastrService
   ) {}
 
   importProductDetails(): void {
@@ -70,5 +72,9 @@ export class ImportProductDetailsComponent {
 
   showListPage(): void {
     this.router.navigate([PRODUCT_MANAGEMENT.LIST_ROUTE]);
+    this.toastr.success(
+      PRODUCT_MANAGEMENT.MESSAGES.IMPORT_SUCCESS,
+      PRODUCT_MANAGEMENT.SUCCESS
+    );
   }
 }

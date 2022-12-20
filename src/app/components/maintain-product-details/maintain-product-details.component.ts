@@ -96,6 +96,10 @@ export class MaintainProductDetailsComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     this.submitted = true;
     if (this.form.invalid) {
+      this.toastr.warning(
+        PRODUCT_MANAGEMENT.MESSAGES.INVALID_FORM,
+        PRODUCT_MANAGEMENT.WARNING
+      );
       return;
     }
     if (this.mode === PRODUCT_MANAGEMENT.KEY_NEW) {

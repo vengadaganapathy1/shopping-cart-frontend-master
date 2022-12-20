@@ -2,6 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
+import { ToastrService } from 'ngx-toastr';
+
 import { ProductDetails } from 'src/app/models/product-details.model';
 import { SearchType } from 'src/app/models/search-type.model';
 import { PRODUCT_MANAGEMENT, SearchModes } from '../../constants/constant';
@@ -16,6 +18,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private toastr: ToastrService,
     private productManagementService: ProductManagementService
   ) {}
   baseUrl = PRODUCT_MANAGEMENT.API_URL;
@@ -103,6 +106,10 @@ export class ProductsListComponent implements OnInit, OnDestroy {
     this.productListSubscription.add(
       this.productManagementService.deleteAll().subscribe(
         () => {
+          this.toastr.success(
+            PRODUCT_MANAGEMENT.MESSAGES.DELETE_ALL_SUCCESS,
+            PRODUCT_MANAGEMENT.SUCCESS
+          );
           this.refreshList();
         },
         (error) => {}

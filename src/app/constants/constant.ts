@@ -23,6 +23,7 @@ export const PRODUCT_MANAGEMENT = {
   ADD_PRODUCT_TITLE: 'Add new product',
   EDIT_PRODUCT_TITLE: 'Edit product',
   SUCCESS: 'Success!',
+  WARNING: 'Warning!',
   MESSAGES: {
     ACTIVATE_SUCCESS: 'Product status was updated successfully!',
     UPDATE_SUCCESS: 'Product details was updated successfully!',
