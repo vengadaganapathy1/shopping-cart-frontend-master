@@ -13,9 +13,9 @@ const baseUrl = PRODUCT_MANAGEMENT.API_URL;
   providedIn: 'root',
 })
 export class ProductManagementService {
-  public highlightEmitter: BehaviorSubject<ProductDetails> =
-    new BehaviorSubject<ProductDetails>({});
-  public highlightObserver$: Observable<ProductDetails>;
+  public highlightEmitter: BehaviorSubject<string> =
+    new BehaviorSubject<string>('');
+  public highlightObserver$: Observable<string>;
 
   constructor(private http: HttpClient) {
     this.highlightObserver$ = this.highlightEmitter.asObservable();

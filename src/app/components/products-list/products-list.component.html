@@ -52,12 +52,13 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let productDetail of productDetails; let i = index" [class.active]="i == currentIndex"
+          <tr *ngFor="let productDetail of productDetails; let i = index" [id]="productDetail.id"
             (click)="setActiveProduct(productDetail, i)">
             <td>{{ productDetail.productSKU }}</td>
             <td>{{ productDetail.productName }}</td>
             <td>{{ productDetail.productPrice }}</td>
-            <td>{{ productDetail.status ? "Active" : "InActive" }}</td>
+            <td><span [ngClass]="productDetail.status ? 'active' : 'inactive'">{{ productDetail.status ? "Active" :
+                "InActive" }}</span></td>
           </tr>
           <tr>
             <td colspan="4" *ngIf="productDetails && productDetails.length === 0">

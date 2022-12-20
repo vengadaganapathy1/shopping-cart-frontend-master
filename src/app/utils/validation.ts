@@ -18,4 +18,18 @@ export default class Validation {
       }
     };
   }
+
+  static alphaNumeric(controlName: string): ValidatorFn {
+    return (controls: AbstractControl) => {
+      const control = controls.get(controlName);
+      const REGEXP = /^[a-zA-Z0-9]{10}$/;
+      console.log(REGEXP.test(control.value));
+      if (REGEXP.test(control.value)) {
+        return null;
+      }
+      return {
+        invalidSKU: true,
+      };
+    };
+  }
 }

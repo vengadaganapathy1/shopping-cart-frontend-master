@@ -7,6 +7,7 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
 import { PRODUCT_MANAGEMENT } from 'src/app/constants/constant';
 import { ProductDetails } from 'src/app/models/product-details.model';
@@ -31,9 +32,11 @@ export class MaintainProductDetailsComponent implements OnInit, OnDestroy {
   };
   productId = 0;
   title = PRODUCT_MANAGEMENT.ADD_PRODUCT_TITLE;
+  buttonText = PRODUCT_MANAGEMENT.KEY_SAVE;
   maintainProductSubscription: Subscription = new Subscription();
 
   constructor(
+    private toastr: ToastrService,
     private route: ActivatedRoute,
     private router: Router,
     private formBuilder: FormBuilder,
@@ -46,16 +49,18 @@ export class MaintainProductDetailsComponent implements OnInit, OnDestroy {
     if (this.productId) {
       this.mode = PRODUCT_MANAGEMENT.KEY_EDIT;
       this.title = PRODUCT_MANAGEMENT.EDIT_PRODUCT_TITLE;
+      this.buttonText = PRODUCT_MANAGEMENT.KEY_UPDATE;
       this.getProductDetail(this.productId.toString());
     } else {
       this.mode = PRODUCT_MANAGEMENT.KEY_NEW;
+      this.buttonText = PRODUCT_MANAGEMENT.KEY_SAVE;
       this.title = PRODUCT_MANAGEMENT.ADD_PRODUCT_TITLE;
     }
   }
 
   createFormGroup(): void {
     this.form = this.formBuilder.group({
-      productSKU: ['', Validators.required],
+      productSKU: ['', [Validators.required, Validators.minLength(8)]],
       productName: [
         '',
         [
@@ -115,7 +120,10 @@ export class MaintainProductDetailsComponent implements OnInit, OnDestroy {
       this.productManagementService.create(data).subscribe(
         (response) => {
           this.submitted = true;
-          this.showListPage();
+          this.showListPage(
+            PRODUCT_MANAGEMENT.MESSAGES.SAVE_SUCCESS,
+            response[PRODUCT_MANAGEMENT.KEY_ID]
+          );
         },
         (error) => {}
       )
@@ -131,7 +139,10 @@ export class MaintainProductDetailsComponent implements OnInit, OnDestroy {
         .update(this.currentProductDetail.id, this.currentProductDetail)
         .subscribe(
           (response) => {
-            this.showListPage();
+            this.showListPage(
+              PRODUCT_MANAGEMENT.MESSAGES.UPDATE_SUCCESS,
+              this.currentProductDetail.id.toString()
+            );
           },
           (error) => {}
         )
@@ -150,7 +161,10 @@ export class MaintainProductDetailsComponent implements OnInit, OnDestroy {
         .update(this.currentProductDetail.id, this.currentProductDetail)
         .subscribe(
           (response) => {
-            this.showListPage();
+            this.showListPage(
+              PRODUCT_MANAGEMENT.MESSAGES.ACTIVATE_SUCCESS,
+              this.currentProductDetail.id.toString()
+            );
           },
           (error) => {}
         )
@@ -163,15 +177,43 @@ export class MaintainProductDetailsComponent implements OnInit, OnDestroy {
         .delete(this.currentProductDetail.id)
         .subscribe(
           (response) => {
-            this.showListPage();
+            this.showListPage(PRODUCT_MANAGEMENT.MESSAGES.DELETE_SUCCESS);
           },
           (error) => {}
         )
     );
   }
 
-  showListPage(): void {
-    this.router.navigate([PRODUCT_MANAGEMENT.LIST_ROUTE]);
+  showListPage(message: string, id?: string): void {
+    if (id) {
+      this.router.navigate([`${PRODUCT_MANAGEMENT.LIST_ROUTE}/${id}`]);
+    } else {
+      this.router.navigate([`${PRODUCT_MANAGEMENT.LIST_ROUTE}`]);
+    }
+    if (message) {
+      this.toastr.success(message, PRODUCT_MANAGEMENT.SUCCESS);
+    }
+  }
+
+  // Only Numbers with Decimals
+  keyPressNumbersDecimal(event: any) {
+    var charCode = event.which ? event.which : event.keyCode;
+    if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57)) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
+  }
+
+  // Only AlphaNumeric
+  keyPressAlphaNumeric(event: any) {
+    var inp = String.fromCharCode(event.keyCode);
+    if (/[a-zA-Z0-9]/.test(inp)) {
+      return true;
+    } else {
+      event.preventDefault();
+      return false;
+    }
   }
 
   ngOnDestroy(): void {

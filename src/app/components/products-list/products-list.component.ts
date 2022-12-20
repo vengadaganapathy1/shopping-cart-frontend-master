@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 import { ProductDetails } from 'src/app/models/product-details.model';
@@ -14,6 +14,7 @@ import { ProductManagementService } from 'src/app/services/productmanagement.ser
 })
 export class ProductsListComponent implements OnInit, OnDestroy {
   constructor(
+    private route: ActivatedRoute,
     private router: Router,
     private productManagementService: ProductManagementService
   ) {}
@@ -40,14 +41,11 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   selectedValue = '';
   selectedSearchOption: SearchType = this.searchOptions[0];
   placeholderText = this.selectedSearchOption.placeHolder;
+  productId = '';
   productListSubscription: Subscription = new Subscription();
 
   ngOnInit(): void {
-    // this.productListSubscription.add(
-    //   this.productManagementService.showListPageObserver$.subscribe(
-    //     (type: string) => this.showListPage(type)
-    //   )
-    // );
+    this.productId = this.route.snapshot.params[PRODUCT_MANAGEMENT.KEY_ID];
     this.retrieveProductDetails();
   }
 
@@ -69,6 +67,9 @@ export class ProductsListComponent implements OnInit, OnDestroy {
       this.productManagementService.getAll().subscribe(
         (data) => {
           this.productDetails = data;
+          if (this.productId) {
+            this.highlightRecord(this.productId);
+          }
         },
         (error) => {}
       )
@@ -78,9 +79,6 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   addNewProduct(): void {
     this.currentProductDetail = {};
     this.router.navigate([PRODUCT_MANAGEMENT.ADD_ROUTE]);
-    // this.productManagementService.updateProductDetailsEmitter.next(
-    //   this.currentProductDetail
-    // );
   }
 
   showImportPage(): void {
@@ -156,6 +154,17 @@ export class ProductsListComponent implements OnInit, OnDestroy {
     this.title = '';
     this.selectedSearchOption = this.searchOptions[0];
     this.placeholderText = this.selectedSearchOption.placeHolder;
+  }
+
+  highlightRecord(id: string): void {
+    setTimeout(() => {
+      document
+        .getElementById(id)
+        .setAttribute(
+          PRODUCT_MANAGEMENT.KEY_CLASS,
+          PRODUCT_MANAGEMENT.KEY_ACTIVE
+        );
+    }, 500);
   }
 
   ngOnDestroy(): void {

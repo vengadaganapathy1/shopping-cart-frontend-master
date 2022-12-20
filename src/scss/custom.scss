@@ -44,6 +44,23 @@ h4 {
       &:hover {
         background-color: #fff7e6;
       }
+
+      td {
+        span {
+          border-radius: 3px;
+          padding: 3px;
+        }
+        span.inactive {
+          background-color: #f5a7a7;
+        }
+        span.active {
+          background-color: #d3e8d3;
+        }
+      }
+    }
+
+    tbody tr.active {
+      background-color: #f8e8c5;
     }
   }
 
