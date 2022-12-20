@@ -1,16 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
-import { ProductManagementService } from 'src/app/services/productmanagement.service';
+import { PRODUCT_MANAGEMENT } from 'src/app/constants/constant';
 import { ProductDetails } from 'src/app/models/product-details.model';
-import { RedirectModes } from '../../constants/constant';
-import { PROCUCT_MANAGEMENT } from '../../constants/constant';
+import { ProductManagementService } from 'src/app/services/productmanagement.service';
 
 @Component({
   selector: 'app-maintain-product-details',
   templateUrl: './maintain-product-details.component.html',
   styleUrls: ['./maintain-product-details.component.scss'],
 })
-export class MaintainProductDetailsComponent implements OnInit {
+export class MaintainProductDetailsComponent implements OnInit, OnDestroy {
+  form: FormGroup;
+  submitted = false;
+  mode = PRODUCT_MANAGEMENT.KEY_NEW;
   currentProductDetail: ProductDetails = {
     productSKU: '',
     productName: '',
@@ -19,82 +29,152 @@ export class MaintainProductDetailsComponent implements OnInit {
     createdBy: '',
     lastModifiedBy: '',
   };
-  message = '';
+  productId = 0;
+  title = PRODUCT_MANAGEMENT.ADD_PRODUCT_TITLE;
+  maintainProductSubscription: Subscription = new Subscription();
 
-  constructor(private productManagementService: ProductManagementService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private formBuilder: FormBuilder,
+    private productManagementService: ProductManagementService
+  ) {}
 
   ngOnInit(): void {
-    this.message = '';
-    this.productManagementService.updateProductDetailsObserver$.subscribe(
-      (productDetails: ProductDetails) => {
-        if (productDetails.id) {
-          this.getProductDetail(productDetails.id.toString());
-        }
-      }
-    );
+    this.createFormGroup();
+    this.productId = this.route.snapshot.params[PRODUCT_MANAGEMENT.KEY_ID];
+    if (this.productId) {
+      this.mode = PRODUCT_MANAGEMENT.KEY_EDIT;
+      this.title = PRODUCT_MANAGEMENT.EDIT_PRODUCT_TITLE;
+      this.getProductDetail(this.productId.toString());
+    } else {
+      this.mode = PRODUCT_MANAGEMENT.KEY_NEW;
+      this.title = PRODUCT_MANAGEMENT.ADD_PRODUCT_TITLE;
+    }
+  }
+
+  createFormGroup(): void {
+    this.form = this.formBuilder.group({
+      productSKU: ['', Validators.required],
+      productName: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6),
+          Validators.maxLength(20),
+        ],
+      ],
+      productPrice: ['', [Validators.required]],
+    });
+  }
+
+  get formCtrl(): { [key: string]: AbstractControl } {
+    return this.form.controls;
   }
 
   getProductDetail(id: string): void {
-    this.productManagementService.get(id).subscribe(
-      (data) => {
-        this.currentProductDetail = data;
-      },
-      (error) => {}
+    this.maintainProductSubscription.add(
+      this.productManagementService.get(id).subscribe(
+        (data) => {
+          this.currentProductDetail = data;
+          this.form.patchValue({
+            productSKU: this.currentProductDetail.productSKU,
+            productName: this.currentProductDetail.productName,
+            productPrice: this.currentProductDetail.productPrice,
+          });
+        },
+        (error) => {}
+      )
     );
   }
 
-  updatePublished(status: boolean): void {
+  onSubmit(): void {
+    this.submitted = true;
+    if (this.form.invalid) {
+      return;
+    }
+    if (this.mode === PRODUCT_MANAGEMENT.KEY_NEW) {
+      this.saveProductDetails();
+    } else if (this.mode === PRODUCT_MANAGEMENT.KEY_EDIT) {
+      this.updateProductDetails();
+    }
+  }
+
+  saveProductDetails(): void {
     const data = {
-      productSKU: this.currentProductDetail.productSKU,
-      productName: this.currentProductDetail.productName,
-      productPrice: this.currentProductDetail.productPrice,
-      status: status,
+      productSKU: this.form.value.productSKU,
+      productName: this.form.value.productName,
+      productPrice: this.form.value.productPrice,
+      status: true,
+      createdBy: PRODUCT_MANAGEMENT.USER_DETAILS.USER_NAME,
+      lastModifiedBy: PRODUCT_MANAGEMENT.USER_DETAILS.USER_NAME,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
-
-    this.message = '';
-
-    this.productManagementService
-      .update(this.currentProductDetail.id, data)
-      .subscribe(
+    this.maintainProductSubscription.add(
+      this.productManagementService.create(data).subscribe(
         (response) => {
-          this.currentProductDetail.status = status;
-          this.message = response.message
-            ? response.message
-            : PROCUCT_MANAGEMENT.MESSAGES.ACTIVATE_SUCCESS;
-          this.showListPage(RedirectModes.RELOAD);
+          this.submitted = true;
+          this.showListPage();
         },
         (error) => {}
-      );
+      )
+    );
   }
 
   updateProductDetails(): void {
-    this.message = '';
+    this.currentProductDetail.productSKU = this.form.value.productSKU;
+    this.currentProductDetail.productName = this.form.value.productName;
+    this.currentProductDetail.productPrice = this.form.value.productPrice;
+    this.maintainProductSubscription.add(
+      this.productManagementService
+        .update(this.currentProductDetail.id, this.currentProductDetail)
+        .subscribe(
+          (response) => {
+            this.showListPage();
+          },
+          (error) => {}
+        )
+    );
+  }
 
-    this.productManagementService
-      .update(this.currentProductDetail.id, this.currentProductDetail)
-      .subscribe(
-        (response) => {
-          this.message = response.message
-            ? response.message
-            : PROCUCT_MANAGEMENT.MESSAGES.UPDATE_SUCCESS;
-          this.showListPage(RedirectModes.RELOAD);
-        },
-        (error) => {}
-      );
+  onReset(): void {
+    this.submitted = false;
+    this.form.reset();
+  }
+
+  updatePublished(status: boolean): void {
+    this.currentProductDetail.status = status;
+    this.maintainProductSubscription.add(
+      this.productManagementService
+        .update(this.currentProductDetail.id, this.currentProductDetail)
+        .subscribe(
+          (response) => {
+            this.showListPage();
+          },
+          (error) => {}
+        )
+    );
   }
 
   deleteProduct(): void {
-    this.productManagementService
-      .delete(this.currentProductDetail.id)
-      .subscribe(
-        (response) => {
-          this.showListPage(RedirectModes.RELOAD);
-        },
-        (error) => {}
-      );
+    this.maintainProductSubscription.add(
+      this.productManagementService
+        .delete(this.currentProductDetail.id)
+        .subscribe(
+          (response) => {
+            this.showListPage();
+          },
+          (error) => {}
+        )
+    );
   }
 
-  showListPage(type: string): void {
-    this.productManagementService.showListPageEmitter.next(type);
+  showListPage(): void {
+    this.router.navigate([PRODUCT_MANAGEMENT.LIST_ROUTE]);
+  }
+
+  ngOnDestroy(): void {
+    this.maintainProductSubscription.unsubscribe();
   }
 }

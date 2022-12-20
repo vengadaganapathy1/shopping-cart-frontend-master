@@ -1,0 +1,79 @@
+$white: #fff !important;
+$dark-gray: #666 !important;
+
+body {
+  font-family: "Roboto", Arial, Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+h4 {
+  margin-bottom: 20px;
+}
+
+.custom-theme {
+  .bg-dark {
+    background-color: $white;
+    border-bottom: 1px solid #ddd;
+
+    a {
+      color: $dark-gray;
+      font-weight: 600;
+      font-size: 20px;
+      text-transform: uppercase;
+    }
+  }
+
+  .input-group > .form-control {
+    border: 1px solid #ccc !important;
+  }
+
+  .table {
+    thead {
+      th {
+        background-color: #eee !important;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+    }
+
+    tbody tr {
+      cursor: pointer;
+
+      &:hover {
+        background-color: #fff7e6;
+      }
+    }
+  }
+
+  .btn-primary {
+    background-color: #006eb3 !important;
+    padding: 8px 15px;
+    border: none !important;
+
+    &:hover {
+      background-color: #e57b06 !important;
+    }
+  }
+
+  .btn-secondary {
+    background-color: #006eb3 !important;
+    padding: 8px 15px;
+    border: none !important;
+
+    &:hover {
+      background-color: #e57b06 !important;
+    }
+  }
+
+  .btn-light {
+    background-color: #fff !important;
+    padding: 8px 10px;
+    border: 1px solid #ccc !important;
+
+    &:hover {
+      background-color: #eee !important;
+    }
+  }
+}

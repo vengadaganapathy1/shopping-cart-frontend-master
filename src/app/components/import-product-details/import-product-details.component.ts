@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+
+import { Papa } from 'ngx-papaparse';
 
 import { ProductManagementService } from 'src/app/services/productmanagement.service';
-import { PROCUCT_MANAGEMENT, RedirectModes } from '../../constants/constant';
-import { Papa } from 'ngx-papaparse';
+import { PRODUCT_MANAGEMENT } from '../../constants/constant';
+import { ProductDetails } from 'src/app/models/product-details.model';
 
 @Component({
   selector: 'app-import-product-details',
@@ -11,25 +14,26 @@ import { Papa } from 'ngx-papaparse';
 })
 export class ImportProductDetailsComponent {
   constructor(
+    private router: Router,
     private productManagementService: ProductManagementService,
     private papa: Papa
   ) {}
 
   importProductDetails(): void {
-    this.test.forEach((product, index) => {
+    this.importedRows.forEach((product, index) => {
       const data = {
-        productSKU: product.productsku,
+        productSKU: product.productSKU,
         productName: product.productName,
         productPrice: product.productPrice,
         status: true,
-        createdBy: PROCUCT_MANAGEMENT.USER_DETAILS.USER_NAME,
-        lastModifiedBy: PROCUCT_MANAGEMENT.USER_DETAILS.USER_NAME,
+        createdBy: PRODUCT_MANAGEMENT.USER_DETAILS.USER_NAME,
+        lastModifiedBy: PRODUCT_MANAGEMENT.USER_DETAILS.USER_NAME,
       };
 
       this.productManagementService.create(data).subscribe(
         (response) => {
-          if (this.test.length - 1 === index) {
-            this.showListPage(RedirectModes.RELOAD);
+          if (this.importedRows.length - 1 === index) {
+            this.showListPage();
           }
         },
         (error) => {}
@@ -37,7 +41,7 @@ export class ImportProductDetailsComponent {
     });
   }
 
-  test: Array<any> = [];
+  importedRows: Array<ProductDetails> = [];
 
   handleFileSelect(evt: any) {
     var files = evt.target.files; // FileList object
@@ -51,20 +55,20 @@ export class ImportProductDetailsComponent {
         header: true,
         complete: (results: any) => {
           for (let i = 0; i < results.data.length; i++) {
-            let productDetails: any = {
-              productsku: results.data[i].ProductSKU,
+            let productDetails: ProductDetails = {
+              productSKU: results.data[i].ProductSKU,
               productName: results.data[i].ProductName,
               productPrice: results.data[i].ProductPrice,
               status: results.data[i].Status,
-            } as any;
-            this.test.push(productDetails);
+            } as ProductDetails;
+            this.importedRows.push(productDetails);
           }
         },
       });
     };
   }
 
-  showListPage(type: string): void {
-    this.productManagementService.showListPageEmitter.next(type);
+  showListPage(): void {
+    this.router.navigate([PRODUCT_MANAGEMENT.LIST_ROUTE]);
   }
 }

@@ -1,7 +1,10 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 import { ProductDetails } from 'src/app/models/product-details.model';
-import { RedirectModes } from '../../constants/constant';
+import { SearchType } from 'src/app/models/search-type.model';
+import { PRODUCT_MANAGEMENT, SearchModes } from '../../constants/constant';
 import { ProductManagementService } from 'src/app/services/productmanagement.service';
 
 @Component({
@@ -9,37 +12,42 @@ import { ProductManagementService } from 'src/app/services/productmanagement.ser
   templateUrl: './products-list.component.html',
   styleUrls: ['./products-list.component.scss'],
 })
-export class ProductsListComponent implements OnInit {
-  constructor(private productManagementService: ProductManagementService) {}
+export class ProductsListComponent implements OnInit, OnDestroy {
+  constructor(
+    private router: Router,
+    private productManagementService: ProductManagementService
+  ) {}
+  baseUrl = PRODUCT_MANAGEMENT.API_URL;
   productDetails?: ProductDetails[];
   currentIndex = -1;
   title = '';
   mode = '';
   currentProductDetail: ProductDetails = {};
-  searchOptions = [
+  searchOptions: Array<SearchType> = [
     {
       keyField: 'productName',
       displayField: 'Product Name',
       placeHolder: 'Search by product name',
+      searchUrl: '?productName=',
     },
     {
       keyField: 'productSKU',
       displayField: 'Product SKU',
       placeHolder: 'Search by product SKU',
+      searchUrl: '/sku?productSKU=',
     },
   ];
   selectedValue = '';
-  selectedSearchOption: {
-    keyField: string;
-    displayField: string;
-    placeHolder: string;
-  } = this.searchOptions[0];
+  selectedSearchOption: SearchType = this.searchOptions[0];
   placeholderText = this.selectedSearchOption.placeHolder;
+  productListSubscription: Subscription = new Subscription();
 
   ngOnInit(): void {
-    this.productManagementService.showListPageObserver$.subscribe(
-      (type: string) => this.showListPage(type)
-    );
+    // this.productListSubscription.add(
+    //   this.productManagementService.showListPageObserver$.subscribe(
+    //     (type: string) => this.showListPage(type)
+    //   )
+    // );
     this.retrieveProductDetails();
   }
 
@@ -56,41 +64,27 @@ export class ProductsListComponent implements OnInit {
       : this.placeholderText;
   }
 
-  showListPage(type: string): void {
-    {
-      if (type === RedirectModes.RELOAD) {
-        this.mode = '';
-        this.refreshList();
-      } else if (type === RedirectModes.CANCEL) {
-        this.mode = '';
-      } else if (type === RedirectModes.UPDATE) {
-        this.mode = type;
-        this.productManagementService.updateProductDetailsEmitter.next(
-          this.currentProductDetail
-        );
-      }
-    }
-  }
-
   retrieveProductDetails(): void {
-    this.productManagementService.getAll().subscribe(
-      (data) => {
-        this.productDetails = data;
-      },
-      (error) => {}
+    this.productListSubscription.add(
+      this.productManagementService.getAll().subscribe(
+        (data) => {
+          this.productDetails = data;
+        },
+        (error) => {}
+      )
     );
   }
 
   addNewProduct(): void {
-    this.mode = RedirectModes.ADD;
-  }
-
-  showDetailsPage(): void {
-    this.mode = RedirectModes.DETALIS;
+    this.currentProductDetail = {};
+    this.router.navigate([PRODUCT_MANAGEMENT.ADD_ROUTE]);
+    // this.productManagementService.updateProductDetailsEmitter.next(
+    //   this.currentProductDetail
+    // );
   }
 
   showImportPage(): void {
-    this.mode = RedirectModes.IMPORT;
+    this.router.navigate([PRODUCT_MANAGEMENT.IMPORT_ROUTE]);
   }
 
   refreshList(): void {
@@ -101,17 +95,20 @@ export class ProductsListComponent implements OnInit {
 
   setActiveProduct(productDetail: ProductDetails, index: number): void {
     this.currentProductDetail = productDetail;
-    this.productManagementService.showProductDetailsEmitter.next(productDetail);
     this.currentIndex = index;
-    this.mode = 'details';
+    this.router.navigate([
+      `${PRODUCT_MANAGEMENT.DETAILS_ROUTE}${this.currentProductDetail.id}`,
+    ]);
   }
 
   removeAllProductDetails(): void {
-    this.productManagementService.deleteAll().subscribe(
-      () => {
-        this.refreshList();
-      },
-      (error) => {}
+    this.productListSubscription.add(
+      this.productManagementService.deleteAll().subscribe(
+        () => {
+          this.refreshList();
+        },
+        (error) => {}
+      )
     );
   }
 
@@ -120,38 +117,37 @@ export class ProductsListComponent implements OnInit {
     this.currentIndex = -1;
     this.mode = '';
     let url = this.getFetchUrl(searchMode);
-    this.productManagementService.findByProductDetails(url).subscribe(
-      (data) => {
-        this.productDetails = data;
-      },
-      (error) => {}
+    this.productListSubscription.add(
+      this.productManagementService.findByProductDetails(url).subscribe(
+        (data) => {
+          this.productDetails = data;
+        },
+        (error) => {}
+      )
     );
   }
 
   resetSearchProduct(): void {
     this.resetSearchControls();
-    this.searchProduct('search');
+    this.searchProduct(SearchModes.SEARCH);
   }
 
   showActiveRecords(): void {
     this.resetSearchControls();
-    this.searchProduct('active');
+    this.searchProduct(SearchModes.ACTIVE);
   }
 
   showInActiveRecords(): void {
     this.resetSearchControls();
-    this.searchProduct('inactive');
+    this.searchProduct(SearchModes.INACTIVE);
   }
 
   getFetchUrl(searchMode: string): string {
-    let url;
-    if (searchMode === 'search') {
-      url =
-        this.selectedSearchOption.keyField === 'productName'
-          ? `?productName=${this.title}`
-          : `/sku?productSKU=${this.title}`;
+    let url = '';
+    if (searchMode === SearchModes.SEARCH) {
+      url = `${this.baseUrl}${this.selectedSearchOption.searchUrl}${this.title}`;
     } else {
-      url = `/${searchMode}`;
+      url = `${this.baseUrl}/${searchMode}`;
     }
     return url;
   }
@@ -160,5 +156,9 @@ export class ProductsListComponent implements OnInit {
     this.title = '';
     this.selectedSearchOption = this.searchOptions[0];
     this.placeholderText = this.selectedSearchOption.placeHolder;
+  }
+
+  ngOnDestroy(): void {
+    this.productListSubscription.unsubscribe();
   }
 }

@@ -1,88 +1,69 @@
-<div>
-  <div *ngIf="currentProductDetail.id" class="form">
-    <h4>Update product details</h4>
-    <form>
-      <div class="form-group">
-        <label for="title">Product SKU</label>
-        <input
-          type="text"
-          class="form-control"
-          id="sku"
-          [(ngModel)]="currentProductDetail.productSKU"
-          name="sku"
-        />
-      </div>
-      <div class="form-group">
-        <label for="description">Product name</label>
-        <input
-          type="text"
-          class="form-control"
-          id="name"
-          [(ngModel)]="currentProductDetail.productName"
-          name="name"
-        />
-      </div>
-      <div class="form-group">
-        <label for="description">Product price</label>
-        <input
-          type="text"
-          class="form-control"
-          id="price"
-          [(ngModel)]="currentProductDetail.productPrice"
-          name="price"
-        />
-      </div>
+<div class="row">
+  <div class="col-md-8">
+    <h4>{{ title }}</h4>
+    <div class="register-form">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Product SKU</label>
+          <input type="text" formControlName="productSKU" class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && formCtrl['productSKU'].errors }" />
+          <div *ngIf="submitted && formCtrl['productSKU'].errors" class="invalid-feedback">
+            <div *ngIf="formCtrl['productSKU'].errors['required']">Product SKU is required</div>
+          </div>
+        </div>
 
-      <div class="form-group">
-        <label><strong>Status:</strong></label>
-        {{ currentProductDetail.status ? "Active" : "InActive" }}
-      </div>
-      <div class="form-group">
-        <label><strong>Description:</strong></label>
-        <p>Lorem Ipsum is simply dummy text of the printing.</p>
-      </div>
-    </form>
-    <div class="clearfix">
-      <button
-        type="submit"
-        class="btn btn-primary float-right"
-        (click)="updateProductDetails()"
-      >
-        Update
-      </button>
-      <button
-        class="btn btn-secondary mr-2 float-right"
-        (click)="deleteProduct()"
-      >
-        Delete
-      </button>
-      <button
-        class="btn btn-light mr-2 float-right"
-        *ngIf="currentProductDetail.status"
-        (click)="updatePublished(false)"
-      >
-        Inactivate
-      </button>
-      <button
-        *ngIf="!currentProductDetail.status"
-        class="btn btn-light mr-2 float-right"
-        (click)="updatePublished(true)"
-      >
-        Activate
-      </button>
+        <div class="form-group">
+          <label>Product name</label>
+          <input type="text" formControlName="productName" class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && formCtrl['productName'].errors }" />
+          <div *ngIf="submitted && formCtrl['productName'].errors" class="invalid-feedback">
+            <div *ngIf="formCtrl['productName'].errors['required']">Product name is required</div>
+            <div *ngIf="formCtrl['productName'].errors['minlength']">
+              Username must be at least 6 characters
+            </div>
+            <div *ngIf="formCtrl['productName'].errors['maxlength']">
+              Username must not exceed 20 characters
+            </div>
+          </div>
+        </div>
 
-      <button
-        class="btn btn-light mr-2 float-right"
-        (click)="showListPage('cancel')"
-      >
-        Cancel
-      </button>
+        <div class="form-group">
+          <label>Product price</label>
+          <input type="text" formControlName="productPrice" class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && formCtrl['productPrice'].errors }" />
+          <div *ngIf="submitted && formCtrl['productPrice'].errors" class="invalid-feedback">
+            <div *ngIf="formCtrl['productPrice'].errors['required']">Product price is required</div>
+            <div *ngIf="formCtrl['productPrice'].errors['productPrice']">Product price is invalid</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><strong>Description:</strong></label>
+          <p>
+            Lorem Ipsum is simply dummy text.
+          </p>
+        </div>
+        <div class="form-group clearfix">
+          <button type="submit" class="btn btn-primary float-right">Save</button>
+          <button type="button" (click)="showListPage()" class="btn btn-light float-right mr-2">
+            Cancel
+          </button>
+          <button type="button" (click)="onReset()" class="btn btn-light float-right mr-2">
+            Reset
+          </button>
+          <button class="btn btn-secondary mr-2" (click)="deleteProduct()" *ngIf="mode==='edit'">
+            Delete
+          </button>
+          <button class="btn btn-light mr-2" *ngIf="currentProductDetail.status && mode==='edit'"
+            (click)="updatePublished(false)">
+            Inactivate
+          </button>
+          <button *ngIf="!currentProductDetail.status && mode==='edit'" class="btn btn-light mr-2"
+            (click)="updatePublished(true)">
+            Activate
+          </button>
+        </div>
+      </form>
     </div>
-
-    <p>{{ message }}</p>
-  </div>
-  <div *ngIf="!currentProductDetail.id">
-    <br />
-    <p>Cannot access this product...</p>
   </div>
 </div>

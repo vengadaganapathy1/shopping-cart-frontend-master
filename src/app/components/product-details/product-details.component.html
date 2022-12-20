@@ -1,49 +1,41 @@
-<h4 class="ml-2">Product details</h4>
-<div *ngIf="currentProductDetail.id" class="pt-2 pl-3 h-100">
-  <img
-    src="../../../assets/images/product-icon.jpg"
-    alt="No image found"
-    width="110"
-    height="104"
-  />
-  <div>
-    <label><strong>Product SKU:</strong></label>
-    {{ currentProductDetail.productSKU }}
+<div class="row">
+  <div class="col-md-8">
+    <h4 class="ml-2">Product details</h4>
+    <div class="pl-3 h-100">
+      <img src="../../../assets/images/shirt.jpg" alt="No image found" width="110" height="104" />
+      <div>
+        <label><strong>Product SKU:</strong></label>
+        {{ currentProductDetail.productSKU }}
+      </div>
+      <div>
+        <label><strong>Product name:</strong></label>
+        {{ currentProductDetail.productName }}
+      </div>
+      <div>
+        <label><strong>Product price:</strong></label>
+        {{ currentProductDetail.productPrice }}
+      </div>
+      <div>
+        <label><strong>Status:</strong></label>
+        {{ currentProductDetail.status ? "Active" : "InActive" }}
+      </div>
+      <div>
+        <label><strong>Description:</strong></label>
+        <p>
+          Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+          Lorem Ipsum has been the industry's standard dummy text ever since the
+          1500s, when an unknown printer took a galley of type and scrambled it to
+          make a type specimen book. It has survived not only five centuries.
+        </p>
+      </div>
+      <div class="clearfix">
+        <button (click)="editProduct()" class="btn btn-primary float-right">
+          Edit
+        </button>
+        <button (click)="showListPage()" class="btn btn-light float-right mr-2">
+          Cancel
+        </button>
+      </div>
+    </div>
   </div>
-  <div>
-    <label><strong>Product name:</strong></label>
-    {{ currentProductDetail.productName }}
-  </div>
-  <div>
-    <label><strong>Product price:</strong></label>
-    {{ currentProductDetail.productPrice }}
-  </div>
-  <div>
-    <label><strong>Status:</strong></label>
-    {{ currentProductDetail.status ? "Active" : "InActive" }}
-  </div>
-  <div>
-    <label><strong>Description:</strong></label>
-    <p>
-      Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-      Lorem Ipsum has been the industry's standard dummy text ever since the
-      1500s, when an unknown printer took a galley of type and scrambled it to
-      make a type specimen book. It has survived not only five centuries.
-    </p>
-  </div>
-  <div class="clearfix">
-    <button (click)="editProduct()" class="btn btn-primary float-right">
-      Edit
-    </button>
-    <button
-      (click)="showListPage('cancel')"
-      class="btn btn-secondary float-right mr-2"
-    >
-      Cancel
-    </button>
-  </div>
-</div>
-<div *ngIf="!currentProductDetail">
-  <br />
-  <p>Please click on a Product...</p>
 </div>

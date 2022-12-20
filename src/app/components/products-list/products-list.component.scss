@@ -1,10 +1,15 @@
 .list {
-    text-align: left;
-    max-width: 750px;
-    margin: auto;
-  }
+  text-align: left;
+  max-width: 750px;
+  margin: auto;
+}
 
-  .grid-height {
-    max-height: 500px;
-    overflow-y: auto;
-  }
+.grid-height {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.border-left {
+  border-left: 1px solid #ccc;
+  padding-left: 15px;
+}

@@ -1,35 +1,24 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 import { ProductDetails } from '../models/product-details.model';
-import { PROCUCT_MANAGEMENT } from '../constants/constant';
+import { ApiResponse } from '../models/api-response.model';
+import { PRODUCT_MANAGEMENT } from '../constants/constant';
 
-const baseUrl = PROCUCT_MANAGEMENT.API_URL;
+const baseUrl = PRODUCT_MANAGEMENT.API_URL;
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductManagementService {
-  public showProductDetailsEmitter: BehaviorSubject<ProductDetails> =
+  public highlightEmitter: BehaviorSubject<ProductDetails> =
     new BehaviorSubject<ProductDetails>({});
-  public showProductDetailsObserver$: Observable<ProductDetails>;
-
-  public updateProductDetailsEmitter: BehaviorSubject<ProductDetails> =
-    new BehaviorSubject<ProductDetails>({});
-  public updateProductDetailsObserver$: Observable<ProductDetails>;
-
-  public showListPageEmitter: BehaviorSubject<string> =
-    new BehaviorSubject<string>('');
-  public showListPageObserver$: Observable<string>;
+  public highlightObserver$: Observable<ProductDetails>;
 
   constructor(private http: HttpClient) {
-    this.showProductDetailsObserver$ =
-      this.showProductDetailsEmitter.asObservable();
-    this.showListPageObserver$ = this.showListPageEmitter.asObservable();
-    this.updateProductDetailsObserver$ =
-      this.updateProductDetailsEmitter.asObservable();
+    this.highlightObserver$ = this.highlightEmitter.asObservable();
   }
   getAll(): Observable<ProductDetails[]> {
     return this.http.get<ProductDetails[]>(baseUrl);
@@ -39,23 +28,34 @@ export class ProductManagementService {
     return this.http.get(`${baseUrl}/${id}`);
   }
 
-  create(data: ProductDetails): Observable<any> {
-    return this.http.post(baseUrl, data);
+  create(data: ProductDetails): Observable<ProductDetails> {
+    return this.http
+      .post(baseUrl, data)
+      .pipe(map((responseData: ProductDetails) => responseData));
   }
 
-  update(id: number | undefined, data: ProductDetails): Observable<any> {
-    return this.http.put(`${baseUrl}/${id}`, data);
+  update(
+    id: number | undefined,
+    data: ProductDetails
+  ): Observable<ApiResponse> {
+    return this.http
+      .put(`${baseUrl}/${id}`, data)
+      .pipe(map((responseData: ApiResponse) => responseData));
   }
 
-  delete(id: number | undefined): Observable<any> {
-    return this.http.delete(`${baseUrl}/${id}`);
+  delete(id: number | undefined): Observable<ApiResponse> {
+    return this.http
+      .delete(`${baseUrl}/${id}`)
+      .pipe(map((responseData: ApiResponse) => responseData));
   }
 
-  deleteAll(): Observable<any> {
-    return this.http.delete(baseUrl);
+  deleteAll(): Observable<ApiResponse> {
+    return this.http
+      .delete(baseUrl)
+      .pipe(map((responseData: ApiResponse) => responseData));
   }
 
   findByProductDetails(url: string): Observable<ProductDetails[]> {
-    return this.http.get<ProductDetails[]>(`${baseUrl}${url}`);
+    return this.http.get<ProductDetails[]>(url);
   }
 }
